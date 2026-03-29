@@ -12,7 +12,7 @@ def apply_BB(img, labels, classes):
         print(label)
 
         #Extracting class and location of the label; YOLO Format: [class x_centre y_centre bb_width bb_height]
-        defect_class = classes[label[0]]
+        defect_class = classes[int(label[0])]
         x_center = label[1] * img_width
         y_center = label[2] * img_height
         box_width = label[3] * img_width
