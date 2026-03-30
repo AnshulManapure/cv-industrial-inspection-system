@@ -5,11 +5,9 @@ import cv2
 
 def apply_BB(img, labels, classes):
     img_height, img_width, _ = img.shape
-    print(img_height, img_width)
     for label in labels:
         label = label.strip().split(" ")
         label = list(map(lambda x:float(x), label))
-        print(label)
 
         #Extracting class and location of the label; YOLO Format: [class x_centre y_centre bb_width bb_height]
         defect_class = classes[int(label[0])]
@@ -58,7 +56,6 @@ for i in range(5):
     selected_image = random.choice(training_images)
     selected_label = selected_image.replace('.jpg','.txt')
     print(selected_image)
-    print(selected_label)
 
     with open(os.path.join(training_path, "labels", selected_label)) as f:
         labels = f.readlines()

@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(__file__)
 data_path = os.path.join(BASE_DIR, "data")
 
 def main():
-    model = YOLO("yolov8m.pt")
+    model = YOLO("yolov8s.pt")
 
     model.train(
         project=os.path.join(BASE_DIR, "runs"),
