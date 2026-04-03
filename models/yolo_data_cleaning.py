@@ -81,7 +81,7 @@ def clean_labels(label_path, defect_classes):
 
 
 BASE_DIR = os.path.dirname(__file__)
-data_path = os.path.join(BASE_DIR, "data", "data.yaml")
+data_path = os.path.join(BASE_DIR, "YOLO_data", "data.yaml")
 
 #Reading metadata
 with open(data_path) as f:
@@ -100,15 +100,15 @@ print(classes)
 start = time.perf_counter()
 print("Cleaning Started...")
 #Cleaning Training data
-label_path = os.path.join(BASE_DIR, "data", "train", "labels")
+label_path = os.path.join(BASE_DIR, "YOLO_data", "train", "labels")
 clean_labels(label_path, defect_classes)
 
 #Cleaning Testing data
-label_path = os.path.join(BASE_DIR, "data", "test", "labels")
+label_path = os.path.join(BASE_DIR, "YOLO_data", "test", "labels")
 clean_labels(label_path, defect_classes)
 
 #Cleaning Validation data
-label_path = os.path.join(BASE_DIR, "data", "valid", "labels")
+label_path = os.path.join(BASE_DIR, "YOLO_data", "valid", "labels")
 clean_labels(label_path, defect_classes)
 
 #Updating data.yaml

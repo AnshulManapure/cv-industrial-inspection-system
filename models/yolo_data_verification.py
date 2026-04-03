@@ -35,7 +35,7 @@ def apply_BB(img, labels, classes):
 
 
 BASE_DIR = os.path.dirname(__file__)
-data_path = os.path.join(BASE_DIR, "data", "data.yaml")
+data_path = os.path.join(BASE_DIR, "YOLO_data", "data.yaml")
 
 #Reading metadata
 with open(data_path) as f:
@@ -48,7 +48,7 @@ for i in range(data['nc']):
 print(classes)
 
 #Getting images and labels
-training_path = os.path.join(BASE_DIR, "data", "train")
+training_path = os.path.join(BASE_DIR, "YOLO_data", "train")
 training_images = os.listdir(os.path.join(training_path, "images"))
 training_labels = os.listdir(os.path.join(training_path, "labels"))
 

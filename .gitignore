@@ -19,6 +19,8 @@ __pycache__/
 *.log
 
 #Model data and runs
-models/data/
+models/YOLO_data/*
+*/anomaly_data/
 runs/
 *.pt
+results
