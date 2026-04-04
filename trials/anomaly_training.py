@@ -27,6 +27,7 @@ if __name__ == "__main__":
     )
 
     engine = Engine(
+        default_root_dir=os.path.join(BASE_DIR, "results"),
         max_epochs = 1,
         accelerator = "auto",
         devices = 1
