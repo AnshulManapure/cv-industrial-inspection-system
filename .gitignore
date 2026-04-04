@@ -17,6 +17,7 @@ __pycache__/
 
 # Logs
 *.log
+Log*.csv
 
 #Model data and runs
 models/YOLO_data/*

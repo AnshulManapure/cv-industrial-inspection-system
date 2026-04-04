@@ -23,7 +23,6 @@ def run_patchcore_frame(frame, model):
         anomaly_map = cv2.normalize(src=anomaly_map, dst=None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
         anomaly_map = anomaly_map.astype(np.uint8)
         heatmap = cv2.applyColorMap(anomaly_map, cv2.COLORMAP_JET)
-        heatmap = cv2.cvtColor(src=heatmap, code=cv2.COLOR_BGR2RGB)
         heatmap = cv2.resize(heatmap, (frame.shape[1], frame.shape[0]))
     
     return score, heatmap

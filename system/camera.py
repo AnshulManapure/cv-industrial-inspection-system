@@ -4,15 +4,23 @@ import cv2
 import numpy as np
 import os
 import time
+from datetime import datetime
+from dotenv import load_dotenv
+import csv
 
 from yolo_inference import *
 from patchcore_inference import *
 
+#Loading environment variables
+load_dotenv()
+MODEL_DIR = os.getenv("MODEL_DIR")
+YOLO_MODELS = os.getenv("YOLO_MODELS")
+PATCHCORE_MODEL_PATH = os.getenv("PATCHCORE_MODEL_PATH")
+
 BASE_DIR = os.path.dirname(__file__)
-MODEL_DIR = os.path.join("models")
+
 
 #Loading YOLO Model
-YOLO_MODELS = os.path.join(MODEL_DIR, "runs")
 latest_yolo_model = os.listdir(YOLO_MODELS)[-1]
 if not latest_yolo_model:
     yolo_found = 0
@@ -22,7 +30,6 @@ else:
     yolo_model = YOLO(os.path.join(YOLO_MODELS, latest_yolo_model, "weights", "best.pt"))
 
 #Loading PatchCore Model
-PATCHCORE_MODEL_PATH = os.path.join(MODEL_DIR, "results", "Patchcore", "multi_source_dataset", "latest", "weights", "lightning", "model.ckpt")
 if not os.path.exists(PATCHCORE_MODEL_PATH):
     patchcore_found = 0
     print("No PatchCore model found. Please train a model by executing the script 'anomaly_training.py' in the 'models' folder.")
@@ -35,6 +42,12 @@ else:
 if yolo_found == 0 or patchcore_found == 0:
     raise RuntimeError("No models found for YOLO and/or PatchCore. Please train the models first.")
 
+#Loading CSV file to log data
+csvFile = open(os.path.join(BASE_DIR, f"Log_{datetime.date(datetime.now())}.csv"), 'a', newline='')
+fieldNames = ['Timestamp','Status','Score/Class']
+writer = csv.DictWriter(csvFile, fieldnames=fieldNames)
+if csvFile.tell() == 0:
+    writer.writeheader()
 
 #Camera Loop
 def stream(source=0):
@@ -99,6 +112,11 @@ def stream(source=0):
         cv2.rectangle(processed_frame, pt1=(x, y), pt2=(x+w, y+h), color=[0,255,0], thickness=3)
 
         #Inference
+        data = {
+                'Timestamp':datetime.time(datetime.now()),
+                'Status':'CLEAN',
+                'Score/Class':None
+            }
         yolo_results = run_yolo(frame=roi_frame, model=yolo_model)
         if yolo_results is not None:
             boxes, classes = yolo_results
@@ -109,15 +127,29 @@ def stream(source=0):
                 conf = float(box.conf[0])
                 label = f"{yolo_model.names[cls]} {conf:.2f}"
                 cv2.rectangle(img=roi_frame, pt1=(x1, y1), pt2=(x2, y2), color=(0, 0, 255), thickness=1)
-                cv2.putText(img=roi_frame, text=label, org=(x1, y1-10), fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=0.5, color=(0, 0, 255), thickness=1)                      
+                cv2.putText(img=roi_frame, text=label, org=(x1, y1-10), fontFace=cv2.FONT_HERSHEY_PLAIN, fontScale=0.5, color=(0, 0, 255), thickness=1)
+                data = {
+                    'Timestamp':datetime.time(datetime.now()),
+                    'Status':'DEFECT',
+                    'Score/Class':yolo_model.names[cls]
+                }
+                writer.writerow(data)
         else:
             if frame_count % 10 == 0:
                 score, heatmap = run_patchcore_frame(frame=roi_frame, model=patchcore_model)
-                if score > 0.7:
+                if score > 9:
                     roi_frame = cv2.addWeighted(src1=roi_frame, alpha=0.6, src2=heatmap, beta=0.4, gamma=0)                   
                     last_heatmap = heatmap
+                    data = {
+                        'Timestamp':datetime.time(datetime.now()),
+                        'Status':'ANOMALY',
+                        'Score/Class':score
+                    }
             elif last_heatmap is not None:
                 roi_frame = cv2.addWeighted(src1=roi_frame, alpha=0.6, src2=last_heatmap, beta=0.4, gamma=0)
+        
+            writer.writerow(data)
+
         
         processed_frame[y:y+h, x:x+w] = roi_frame
 
@@ -136,6 +168,7 @@ def stream(source=0):
         new_fps = 1/frame_time
         fps = ((1-alpha) * fps) + (alpha * new_fps)
     
+    csvFile.close()
     cap.release()
     cv2.destroyAllWindows()
 

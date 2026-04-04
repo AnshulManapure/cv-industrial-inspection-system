@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inspection System</title>
+</head>
+<body>
+
+<h2>Upload Image</h2>
+
+<input type="file" id="fileInput">
+<button onclick="sendImage()">Inspect</button>
+
+<br><br>
+
+<img id="output" width="400"/>
+
+<pre id="results"></pre>
+
+<script>
+function sendImage() {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("/inspect", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Show image
+        document.getElementById("output").src =
+            "data:image/jpeg;base64," + data.image;
+
+        // Show JSON
+        document.getElementById("results").innerText =
+            JSON.stringify(data.results, null, 2);
+    });
+}
+</script>
+
+</body>
+</html>
